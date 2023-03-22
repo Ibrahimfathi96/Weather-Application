@@ -29,9 +29,9 @@ class _HomePageState extends State<HomePage> {
                   SearchPage.routeName,
                 );
               },
-              icon: const Icon(
+              icon: Icon(
                 Icons.search,
-                color: Colors.black,
+                color: weatherData == null ? Colors.white : Colors.black,
                 size: 30,
               ))
         ],
