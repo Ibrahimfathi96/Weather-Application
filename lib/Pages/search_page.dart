@@ -1,9 +1,6 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:weather_app/Models/weather_model.dart';
-import 'package:weather_app/Providers/weather_providers.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:weather_app/Bloc/Weather_Cubit/weather_cubit.dart';
 import 'package:weather_app/Services/weather_service.dart';
 
 class SearchPage extends StatefulWidget {
@@ -14,7 +11,7 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
-  late String cityName;
+  String? cityName;
 
   WeatherService service = WeatherService();
 
@@ -33,12 +30,9 @@ class _SearchPageState extends State<SearchPage> {
             },
             onSubmitted: (data) async {
               cityName = data;
-              WeatherModel? weather =
-                  await service.getWeatherService(cityName: cityName);
-              Provider.of<WeatherProvider>(context, listen: false).weatherData =
-                  weather;
-              Provider.of<WeatherProvider>(context, listen: false).cityName =
-                  cityName;
+              BlocProvider.of<WeatherCubit>(context)
+                  .getWeather(cityName: cityName!);
+              BlocProvider.of<WeatherCubit>(context).cityName = cityName;
               Navigator.pop(context);
             },
             decoration: InputDecoration(
@@ -55,12 +49,8 @@ class _SearchPageState extends State<SearchPage> {
                   color: Colors.black,
                 ),
                 onPressed: () async {
-                  WeatherModel? weather =
-                      await service.getWeatherService(cityName: cityName);
-                  Provider.of<WeatherProvider>(context, listen: false)
-                      .weatherData = weather;
-                  Provider.of<WeatherProvider>(context, listen: false)
-                      .cityName = cityName;
+                  BlocProvider.of<WeatherCubit>(context)
+                      .getWeather(cityName: cityName!);
                   Navigator.pop(context);
                 },
               ),

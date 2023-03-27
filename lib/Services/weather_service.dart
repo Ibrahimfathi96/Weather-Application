@@ -8,8 +8,8 @@ class WeatherService {
   String apiKey = 'b38bb987235c42959b820024231803';
   String apiEndPoint = 'forecast';
 
-  Future<WeatherModel?> getWeatherService({required String cityName}) async {
-    WeatherModel? weatherModel;
+  Future<WeatherModel> getWeatherService({required String cityName}) async {
+    late WeatherModel weatherModel;
     try {
       Uri url = Uri.parse(
           '$baseUrl/$apiEndPoint.json?key=$apiKey&q=$cityName&days=7');
