@@ -12,14 +12,127 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return BlocBuilder<WeatherCubit, WeatherState>(
+      builder: (context, state) {
+        if (state is WeatherDataLoading) {
+          return LoadingData();
+        } else if (state is WeatherLoadingSuccess) {
+          return SuccessWidgetBody(weatherData: state.weatherModel);
+        } else if (state is WeatherLoadingFailure) {
+          return const FailureBody();
+        } else {
+          return const DefaultBody();
+        }
+      },
+    );
+  }
+}
+
+class SuccessWidgetBody extends StatelessWidget {
+  WeatherModel? weatherData;
+
+  SuccessWidgetBody({required this.weatherData});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          backgroundColor: BlocProvider.of<WeatherCubit>(context)
+              .weatherModel!
+              .getThemeColors(),
+          actions: [
+            IconButton(
+                onPressed: () {
+                  Navigator.pushNamed(
+                    context,
+                    SearchPage.routeName,
+                  );
+                },
+                icon: Icon(
+                  Icons.search,
+                  color: Colors.black,
+                  size: 30,
+                ))
+          ],
+          centerTitle: true,
+          title: const Text(
+            'Weather',
+            style: TextStyle(color: Colors.black),
+          ),
+        ),
+        body: Container(
+          // color: weatherData!.getThemeColors(),
+          decoration: BoxDecoration(
+              gradient: LinearGradient(
+            colors: [
+              weatherData!.getThemeColors(),
+              weatherData!.getThemeColors()[300]!,
+              weatherData!.getThemeColors()[100]!,
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          )),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Spacer(
+                flex: 3,
+              ),
+              Text(
+                BlocProvider.of<WeatherCubit>(context).cityName!,
+                style:
+                    const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              Text(
+                weatherData!.date.toString(),
+                textAlign: TextAlign.center,
+                style:
+                    const TextStyle(fontSize: 22, fontWeight: FontWeight.w500),
+              ),
+              const Spacer(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Image.asset(weatherData!.getImage()),
+                  Text('${weatherData!.temp.toInt()}',
+                      style: const TextStyle(
+                          fontSize: 26, fontWeight: FontWeight.bold)),
+                  Column(
+                    children: [
+                      Text('max.temp: ${weatherData!.maxTemp.toInt()}',
+                          style: const TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.w500)),
+                      Text('min.temp: ${weatherData!.minTemp.toInt()}',
+                          style: const TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.w500)),
+                    ],
+                  ),
+                ],
+              ),
+              const Spacer(),
+              Text(weatherData!.condition,
+                  style: const TextStyle(
+                      fontSize: 32, fontWeight: FontWeight.bold)),
+              const Spacer(
+                flex: 5,
+              ),
+            ],
+          ),
+        ));
+  }
+}
+
+class FailureBody extends StatelessWidget {
+  const FailureBody({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor:
-            BlocProvider.of<WeatherCubit>(context).weatherModel == null
-                ? Colors.blue
-                : BlocProvider.of<WeatherCubit>(context)
-                    .weatherModel!
-                    .getThemeColors(),
+        backgroundColor: Colors.blue,
         actions: [
           IconButton(
               onPressed: () {
@@ -36,111 +149,19 @@ class HomePage extends StatelessWidget {
         centerTitle: true,
         title: const Text('Weather'),
       ),
-      body: BlocBuilder<WeatherCubit, WeatherState>(
-        builder: (context, state) {
-          if (state is WeatherDataLoading) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          } else if (state is WeatherLoadingSuccess) {
-            return SuccessWidgetBody(weatherData: state.weatherModel);
-          } else if (state is WeatherLoadingFailure) {
-            return const FailureBody();
-          } else {
-            return const DefaultBody();
-          }
-        },
-      ),
-    );
-  }
-}
-
-class SuccessWidgetBody extends StatelessWidget {
-  WeatherModel? weatherData;
-
-  SuccessWidgetBody({required this.weatherData});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      // color: weatherData!.getThemeColors(),
-      decoration: BoxDecoration(
-          gradient: LinearGradient(
-        colors: [
-          weatherData!.getThemeColors(),
-          weatherData!.getThemeColors()[100]!,
-        ],
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-      )),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Spacer(
-            flex: 3,
+      body: Column(
+        children: const [
+          Center(
+            child: CircularProgressIndicator(),
           ),
-          Text(
-            BlocProvider.of<WeatherCubit>(context).cityName!,
-            style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+          Center(
+            child: Text('   Something Went Wrong 😕   '),
           ),
-          const SizedBox(
-            height: 10,
-          ),
-          Text(
-            weatherData!.date.toString(),
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w500),
-          ),
-          const Spacer(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Image.asset(weatherData!.getImage()),
-              Text('${weatherData!.temp.toInt()}',
-                  style: const TextStyle(
-                      fontSize: 26, fontWeight: FontWeight.bold)),
-              Column(
-                children: [
-                  Text('max.temp: ${weatherData!.maxTemp.toInt()}',
-                      style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.w500)),
-                  Text('min.temp: ${weatherData!.minTemp.toInt()}',
-                      style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.w500)),
-                ],
-              ),
-            ],
-          ),
-          const Spacer(),
-          Text(weatherData!.condition,
-              style:
-                  const TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
-          const Spacer(
-            flex: 5,
+          Center(
+            child: Text('Please try again'),
           ),
         ],
       ),
-    );
-  }
-}
-
-class FailureBody extends StatelessWidget {
-  const FailureBody({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: const [
-        Center(
-          child: CircularProgressIndicator(),
-        ),
-        Center(
-          child: Text('   Something Went Wrong 😕   '),
-        ),
-        Center(
-          child: Text('Please try again'),
-        ),
-      ],
     );
   }
 }
@@ -150,23 +171,72 @@ class DefaultBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: const [
-          Text(
-            'there is no weather 😔',
-            style: TextStyle(
-              fontSize: 30,
-            ),
-          ),
-          Text(
-            'searching now 🔍',
-            style: TextStyle(
-              fontSize: 30,
-            ),
-          )
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.blue,
+        actions: [
+          IconButton(
+              onPressed: () {
+                Navigator.pushNamed(
+                  context,
+                  SearchPage.routeName,
+                );
+              },
+              icon: Icon(
+                Icons.search,
+                size: 30,
+              ))
         ],
+        centerTitle: true,
+        title: const Text('Weather'),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: const [
+            Text(
+              'there is no weather 😔',
+              style: TextStyle(
+                fontSize: 30,
+              ),
+            ),
+            Text(
+              'searching now 🔍',
+              style: TextStyle(
+                fontSize: 30,
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class LoadingData extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.blue,
+        actions: [
+          IconButton(
+              onPressed: () {
+                Navigator.pushNamed(
+                  context,
+                  SearchPage.routeName,
+                );
+              },
+              icon: Icon(
+                Icons.search,
+                size: 30,
+              ))
+        ],
+        centerTitle: true,
+        title: const Text('Weather'),
+      ),
+      body: Center(
+        child: CircularProgressIndicator(),
       ),
     );
   }
